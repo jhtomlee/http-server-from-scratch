@@ -1,0 +1,3 @@
+*.o
+/libraries/*
+.DS_Store
