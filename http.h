@@ -42,4 +42,4 @@ void parse_uri_and_params(httpRequest *req, string line);
 /* Common respose headers */
 void response_common_headers(httpResponse *response, int status);
 /* Stringfy Http Response*/
-string stringfy_http_response(httpResponse *response, bool isHeadRequest);
+string stringfy_http_response(httpResponse *response);

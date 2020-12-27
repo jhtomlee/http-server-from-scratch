@@ -7,9 +7,10 @@ A multithreaded HTTP web server implemented using TCP socket programming with fe
 ## Components / Features
 - [X] HTTP request parser
 - [X] Web server that implements the basic functionalities of the [HTTP protocol](https://www.ietf.org/rfc/rfc2616.txt)
-- [ ] Load balancer node that receives initial request from clients and redirects them to an available web server
-- [ ] Cookie handling for session management
+- [X] HTTP routes for GET /loginstatus, POST /signin, and POST /signout 
+- [X] Cookie handling for session management
 - [X] Console Web-UI to test the HTTP server and its features
+- [ ] Load balancer node that receives initial request from clients and redirects them to an available web server
 
 ## Tech Stack
 C++, TCP socket programming, POSIX threads (pthreads), HTTP protocol, HTML

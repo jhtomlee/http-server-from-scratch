@@ -21,8 +21,20 @@ extern map<string, string> sidUserMapping;
 /* GET /index.html */
 int get_index_html(int comm_fd, string sessionId)
 {
+  // Get sessionId cookie
+  if (sessionId.size() ==0){
+		printf("[%d] No cookie detected\n", comm_fd);
+		sessionId = to_string(sid);
+		sid++; 
+	} else{
+		printf("[%d] Cookie detected: %s\n", comm_fd, sessionId.c_str());
+	}
+
+  // Create http headers
   char *temp = (char *)malloc(2000 * sizeof(char));
-  strcpy(temp, "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: %d\n\n");
+  strcpy(temp, "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: %d\nSet-Cookie: sid=%s\n\n");
+
+  // Concat index.html files
   FILE *file = fopen("console-webui/index.html", "r");
   char line[100];
   int size = 0;
@@ -31,8 +43,10 @@ int get_index_html(int comm_fd, string sessionId)
     strcat(temp, line);
     size += strlen(line);
   }
+
+  // Create response
   char *response = (char *)malloc(2000 * sizeof(char));
-  int n = sprintf(response, temp, size);
+  int n = sprintf(response, temp, size, sessionId.c_str());
   if (debug_mode)
     printf("%s\n", response);
   send(comm_fd, response, n, 0);
@@ -113,19 +127,90 @@ int get_favicon(int comm_fd){
   fclose(file);
   free(response);
   return 0;
-
 }
 
-/* GET /getuser */
-int get_user(int comm_fd, string parameter, string sessionId)
-{
+/* GET /loginstatus */
+int get_login_status(int comm_fd, string sessionId){
 
-  return 0;
+  // check session
+  string username = "";
+  bool isLoggedIn = false;
+  if (sidUserMapping.find(sessionId) == sidUserMapping.end() || sidUserMapping[sessionId].compare("") == 0){
+    isLoggedIn = false;
+  } else {
+    isLoggedIn = true;
+    username = sidUserMapping[sessionId];
+  }
+  // create http response
+	httpResponse response;
+	response_common_headers(&response, 200);
+  json resBody;
+  if (isLoggedIn){
+    resBody["result"] = "found";
+    resBody["user"] = username;
+    resBody["msg"] = "Logged in user found";
+  } else{
+    resBody["result"] = "not found";
+    resBody["msg"] = "Logged in user not found";
+  }
+  response.body = resBody;
+	string response_str = stringfy_http_response(&response);
+
+  // send response to client
+	send(comm_fd, response_str.c_str(), response_str.size(), 0);
+	if (debug_mode)printf("%s\n", response_str.c_str());
+
+	return 0;
 }
 
-/* POST /createuser */
-int post_create_user(int comm_fd, json body)
+/* POST /signin */
+int post_signin(int comm_fd, json body, string sessionId)
 {
+  // Get username from http body
+  string username = body["user"];
 
-  return 0;
+  // map sessionId to user
+	sidUserMapping[sessionId] = username;
+
+  // create http response
+	httpResponse response;
+	response_common_headers(&response, 200);
+  json resBody;
+	resBody["result"] = "success";
+	resBody["user"] = username;
+  resBody["msg"] = "User has successfully signed in!";
+	response.body = resBody;
+	string response_str = stringfy_http_response(&response);
+
+  // send response to client
+	send(comm_fd, response_str.c_str(), response_str.size(), 0);
+	if (debug_mode)printf("%s\n", response_str.c_str());
+
+	return 0;
+}
+
+/* POST /signout */
+int post_signout(int comm_fd, string sessionId)
+{
+  // Get username from sessionId
+	string username = sidUserMapping[sessionId];
+
+  // Clear user
+  sidUserMapping[sessionId] = "";
+
+  // create http response
+	httpResponse response;
+	response_common_headers(&response, 200);
+  json resBody;
+	resBody["result"] = "success";
+	resBody["user"] = username;
+  resBody["msg"] = "User has successfully signed out!";
+	response.body = resBody;
+	string response_str = stringfy_http_response(&response);
+
+  // send response to client
+	send(comm_fd, response_str.c_str(), response_str.size(), 0);
+	if (debug_mode)printf("%s\n", response_str.c_str());
+  
+	return 0;
 }

@@ -130,7 +130,7 @@ void response_common_headers(httpResponse *response, int status)
   }
 }
 
-string stringfy_http_response(httpResponse *response, bool isHeadRequest)
+string stringfy_http_response(httpResponse *response)
 {
   string contentLength = "Content-Length: ";
   contentLength += to_string(response->body.dump().size());
@@ -145,9 +145,7 @@ string stringfy_http_response(httpResponse *response, bool isHeadRequest)
   response_str += response->allowMethods;
   response_str += response->allowHeaders;
   response_str += "\n";
-  if (!isHeadRequest)
-  {
-    response_str += response->body.dump();
-  }
+  response_str += response->body.dump();
+  
   return response_str;
 }

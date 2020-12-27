@@ -122,8 +122,7 @@ int main(int argc, char *argv[])
     pthread_create(thread, NULL, worker, comm_fd);
   }
 
-  /* TERMINATING SERVER*/
-  // join terminated threads
+  /* TERMINATING SERVER - joins terminated threads*/
   for (int i = 1; i < threads.size(); i++)
   {
     if (pthread_join(*(threads.at(i)), NULL) != 0)
@@ -283,9 +282,9 @@ int handle_request(char *request, int comm_fd)
       }
     }
   }
-  else if (request_parsed.uri.compare("/createuser") == 0)
+  else if (request_parsed.uri.compare("/loginstatus") == 0)
   {
-    if (post_create_user(comm_fd, request_parsed.bodyJson) != 0)
+    if (get_login_status(comm_fd, sessionId) != 0)
     {
       if (debug_mode)
       {
@@ -293,9 +292,19 @@ int handle_request(char *request, int comm_fd)
       }
     }
   }
-  else if (request_parsed.uri.compare("/getuser") == 0)
+  else if (request_parsed.uri.compare("/signin") == 0)
   {
-    if (get_user(comm_fd, request_parsed.params, sessionId) != 0)
+    if (post_signin(comm_fd, request_parsed.bodyJson, sessionId) != 0)
+    {
+      if (debug_mode)
+      {
+        printf("[%d] Request %s failed\n", comm_fd, request_parsed.uri.c_str());
+      }
+    }
+  }
+  else if (request_parsed.uri.compare("/signout") == 0)
+  {
+    if (post_signout(comm_fd, sessionId) != 0)
     {
       if (debug_mode)
       {
