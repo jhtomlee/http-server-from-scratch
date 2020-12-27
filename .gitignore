@@ -1,4 +1,5 @@
 *.o
 httpserver
+loadbalancer
 /libraries/*
 .DS_Store

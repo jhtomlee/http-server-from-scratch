@@ -1,4 +1,4 @@
-TARGETS = httpserver routes.o http.o
+TARGETS = httpserver loadbalancer routes.o http.o
 CXX =/usr/local/bin/g++-10
 all: $(TARGETS)
 
@@ -9,7 +9,10 @@ routes.o: routes.cc
 	$(CXX) -c -o routes.o routes.cc
 
 httpserver: httpserver.cc routes.o http.o 
-	$(CXX) $^ -lpthread -lresolv -o $@ 
+	$(CXX) $^ -lpthread -o $@ 
+
+loadbalancer: loadbalancer.cc http.o 
+	$(CXX) $^ -lpthread -o $@ 
 
 clean:
 	rm -f $(TARGETS) *~ *.o
