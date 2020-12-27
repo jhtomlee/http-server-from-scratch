@@ -243,10 +243,19 @@ int handle_request(char *request, int comm_fd)
   }
 
   // Route request
-  bool isHeadRequest = false;
   if (request_parsed.uri.compare("/index.html") == 0)
   {
-    if (get_index_html(comm_fd, isHeadRequest, sessionId) != 0)
+    if (get_index_html(comm_fd, sessionId) != 0)
+    {
+      if (debug_mode)
+      {
+        printf("[%d] Request %s failed\n", comm_fd, request_parsed.uri.c_str());
+      }
+    }
+  }
+  if (request_parsed.uri.compare("/favicon.ico") == 0)
+  {
+    if (get_favicon(comm_fd) != 0)
     {
       if (debug_mode)
       {
@@ -256,7 +265,17 @@ int handle_request(char *request, int comm_fd)
   }
   else if (request_parsed.uri.compare("/main.js") == 0)
   {
-    if (get_main_js(comm_fd, isHeadRequest) != 0)
+    if (get_main_js(comm_fd) != 0)
+    {
+      if (debug_mode)
+      {
+        printf("[%d] Request %s failed\n", comm_fd, request_parsed.uri.c_str());
+      }
+    }
+  }
+  else if (request_parsed.uri.compare("/static/logo.png") == 0)
+  {
+    if (get_logo_js(comm_fd) != 0)
     {
       if (debug_mode)
       {
@@ -276,7 +295,7 @@ int handle_request(char *request, int comm_fd)
   }
   else if (request_parsed.uri.compare("/getuser") == 0)
   {
-    if (get_user(comm_fd, request_parsed.params, isHeadRequest, sessionId) != 0)
+    if (get_user(comm_fd, request_parsed.params, sessionId) != 0)
     {
       if (debug_mode)
       {
@@ -286,7 +305,7 @@ int handle_request(char *request, int comm_fd)
   }
   else
   {
-    if (get_index_html(comm_fd, isHeadRequest, sessionId) != 0)
+    if (get_index_html(comm_fd, sessionId) != 0)
     {
       if (debug_mode)
       {
